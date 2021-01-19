@@ -2,9 +2,8 @@
 #include<stdlib.h>
 #include<ctype.h>
 #include<string.h>
-// #include <unistd.h>
 #define SIZE 50
-static char str[30];
+static char str[50];
 
 
 int s[SIZE];
@@ -120,10 +119,13 @@ void push1(int elem)
 
 int main()
 {
-	write_format("dec");
-    char in[30],post[30],ch;
+	write_format("app");
+    char in[50],post[50],ch;
     int i,j,l;
     int izlaz;
+    int br_rez;
+    int prekoracenje;
+    char str_rez[50];
     do
     {
 		printf("\n Unesite string: ");
@@ -190,27 +192,48 @@ int main()
 				    flag1=0;
 				    op2=pop1();
 				    op1=pop1();
+				    write_reg("regC", op1);
+    				    write_reg("regD", op2);
 				    switch(ch)
 				    {
-				        case '+':push1(op1+op2);
+				        case '+':write_alu("regC", "regD", "+");
+    					  	  sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					  br_rez = atoi(str_rez);
+				        	  push1(br_rez); 
+				        	  break;
+				        case '-':write_alu("regC", "regD", "-");
+    						  sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					  br_rez = atoi(str_rez);
+				                 push1(br_rez);
 				                 break;
-				        case '-':push1(op1-op2);
+				        case '*':write_alu("regC", "regD", "*");
+    						  sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					  br_rez = atoi(str_rez);
+				        	  push1(br_rez);
 				                 break;
-				        case '*':push1(op1*op2);
-				                 break;
-				        case '/':push1(op1/op2);
+				        case '/':write_alu("regC", "regD", "/");
+    						  sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					  br_rez = atoi(str_rez);
+				        	  push1(br_rez);
 				                 break;
 
 				    }
 				}
 				i++;
+				if (prekoracenje == 1)
+				{  	
+					strcpy(in, "exit");
+				    	printf("Doslo je do prekoracenja opsega\n");
+				 }
 			}
-			
+			izlaz = strcmp(in, "exit");
 			if (izlaz != 0)
 			{
 				printf("Rezultat: %d\n",s[top1]);
 				write_reg("regA", 0);
 				write_reg("regB", 0);
+				write_reg("regC", 0);
+				write_reg("regD", 0);
 				strcpy(post, " ");
 				for (int br = 0; br < SIZE; br++)
 					s[br] = 0;
@@ -219,13 +242,17 @@ int main()
 				flag1 = 0;
 				
 			}
-			else 
-				printf("EXIT");
+			//else 
+				//printf("EXIT");
 			
 		  
     }
     while (izlaz);
+    write_reg("regA", 0);
+    write_reg("regB", 0);
+    write_reg("regC", 0);
+    write_reg("regD", 0);
+    write_alu("regA", "regB", "+");
+    write_format("hex");
     return 0;
  }
- 
- 

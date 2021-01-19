@@ -41,6 +41,7 @@ unsigned char result, carry;
 unsigned char ispis = 1; //ispis = 0 to znaci dec
 		     //  ispis = 1 to znaci hex
 			// ispis = 2 to znaci bin
+			// ispis = 3 znaci app
 
 int alu_open(struct inode *pinode, struct file *pfile) 
 {
@@ -92,6 +93,7 @@ ssize_t alu_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
 	
 	switch (ispis)
 	{
+		case 3: len = scnprintf(input, SIZE, "%d %d", result, carry); break;
 		case 2: 
 			while (i < br_velicina)  // i < 5
 			{
@@ -105,10 +107,10 @@ ssize_t alu_read(struct file *pfile, char __user *buffer, size_t length, loff_t 
 		
 			tmp[i] = '\0'; //tmp[5]
 			printk(KERN_INFO "tmp 0b%s", tmp);
-			len = scnprintf(input, SIZE, "%s", tmp);
+			len = scnprintf(input, SIZE, "0b%s %d", tmp, carry);
 			break;
-		case 1: len = scnprintf(input, SIZE, "0x%x %d", result, carry); break;
-		case 0: len = scnprintf(input, SIZE, "%d", result); break;
+		case 1: len = scnprintf(input, SIZE, "0x%x %d\n", result, carry); break;
+		case 0: len = scnprintf(input, SIZE, "%d %d\n", result, carry); break;
 
 	}
 	
@@ -181,8 +183,10 @@ ssize_t alu_write(struct file *pfile, const char __user *buffer, size_t length, 
 			ispis = 0;
 		else if (dec_bin_hex == 'b')
 			ispis = 2;
-		else 
+		else if (dec_bin_hex == 'h')
 			ispis = 1;
+		else
+			ispis = 3;
 	}
 	else
 	{
@@ -263,7 +267,7 @@ ssize_t alu_write(struct file *pfile, const char __user *buffer, size_t length, 
 static int __init alu_init(void)
 {
    int ret = 0;
-   ret = alloc_chrdev_region(&my_dev_id, 0, 1, "alu");
+   ret = alloc_chrdev_region(&my_dev_id, 1, 1, "alu");
    if (ret){
       printk(KERN_ERR "failed to register char device\n");
       return ret;

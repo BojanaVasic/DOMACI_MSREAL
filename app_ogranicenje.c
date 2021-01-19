@@ -37,7 +37,6 @@ FILE* fp;
 const char* read_alu() {
 	char *str = NULL;
 	size_t len = 0;
-	// jel si kopirala ove funkcije potupuno?da
 	fp = fopen("/dev/alu", "r");
 	
 	// str = (char *) malloc(len + 1); // +1 zbog nove linije
@@ -212,16 +211,18 @@ int main()
 
 
 {	
-	write_format("dec");
+	write_format("app");
     char in[30],post[30],ch;
     int i,j,l;
     int izlaz;
-
+    char str_rez[50];
+    int br_rez;
+	int prekoracenje;
 
     do
     {
 
-        printf("Unesite matematicki izraz sa maksimalno 4 celobrojna operanda u opsegu [0-255]\n" );
+        printf("\nUnesite matematicki izraz sa maksimalno 4 celobrojna operanda u opsegu [0-255]\n" );
         scanf("%s", in);
         if (ispravan_izraz(in))
         {
@@ -262,7 +263,7 @@ int main()
 
 
 			i = 0;
-			double  op1, op2;
+			int  op1, op2;
 			int duzina = strlen(post);
 			while( i < duzina)
 			{
@@ -280,17 +281,37 @@ int main()
 				    flag1=0;
 				    op2=pop1();
 				    op1=pop1();
+				    write_reg("regC", op1);
+    				    write_reg("regD", op2);
 				    switch(ch)
 				    {
-				        case '+':push1(op1+op2); 
+				        case '+':write_alu("regC", "regD", "+");
+    					  	     sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					   br_rez = atoi(str_rez);
+				   		  push1(br_rez);
 				                 break;
-				        case '-':push1(op1-op2);
+				        case '-':write_alu("regC", "regD", "-");
+    						     sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					 	br_rez = atoi(str_rez);
+				    		 push1(br_rez);
 				                 break;
-				        case '*':push1(op1*op2);
+				        case '*':write_alu("regC", "regD", "*");
+    						     sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					      br_rez = atoi(str_rez);
+				   		  push1(br_rez);
 				                 break;
-				        case '/':push1(op1/op2);
+				        case '/':write_alu("regC", "regD", "/");
+    						     sscanf(read_alu(), "%4s %d", str_rez, &prekoracenje);
+        					     br_rez = atoi(str_rez);
+				    		 push1(br_rez);
 				                 break;
 
+				    }
+				    
+				    if (prekoracenje == 1)
+				    {  	
+				    	strcpy(in, "exit");
+				    	printf("Doslo je do prekoracenja opsega\n");
 				    }
 				}
 				i++;
@@ -306,6 +327,8 @@ int main()
 				printf("Rezultat: %d\n",s[top1]);
 				write_reg("regA", 0);
 				write_reg("regB", 0);
+				write_reg("regC", 0);
+				write_reg("regD", 0);
 				strcpy(post, " ");
 				for (int br = 0; br < SIZE; br++)
 					s[br] = 0;
@@ -314,10 +337,16 @@ int main()
 				flag1 = 0;
 				
 		}
-		else 
-				printf("EXIT\n");
+		//else 
+		//		printf("EXIT\n");
     }
     while (izlaz);
+    write_reg("regA", 0);
+    write_reg("regB", 0);
+    write_reg("regC", 0);
+    write_reg("regD", 0);
+    write_alu("regA", "regB", "+");
+    write_format("hex");
     return 0;
     
     
